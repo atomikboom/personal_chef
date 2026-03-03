@@ -19,3 +19,4 @@ Benvenuto nel tuo assistente operativo! Questa app ti aiuta a gestire il magazzi
 - Il login è un "gate" puramente locale per la preview.
 - Le RLS su Supabase non sono configurate per l'auth multi-utente in questo MVP.
 - La chiusura evento (ripristino materiali) è semplificata come stato UI.
+# personal_chef
