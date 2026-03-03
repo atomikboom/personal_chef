@@ -1,0 +1,38 @@
+# Task: PERSONAL_CHEF Project Refinement
+
+- [x] Project Assessment and Planning
+    - [x] Analyze non-functional buttons in `events.tsx` and `new.tsx`
+    - [x] Review data structure for materials and ingredients
+    - [x] Design ingredient aggregation logic
+- [x] Fix Non-functional Buttons
+    - [x] Debug and fix event creation flow
+    - [x] Verify functionality of other action buttons (edit, delete, etc.)
+- [x] Implement Material Tracking in Menus
+    - [x] Update data models/store to support materials in events/menus
+    - [x] Add UI to include materials when creating/viewing events
+- [x] Implement Ingredient Aggregation
+    - [x] Create utility for grouping ingredients by name/unit
+    - [x] Update Event Details UI to show aggregated list with sub-details
+- [x] Fix Tab Navigation Add Buttons (Simple)
+    - [x] Implement initial mock actions
+    - [x] Add basic handlers to "+" buttons
+- [x] Implement Detailed Entry Modals
+    - [x] Design and create `app/modals/add-ingredient.tsx`
+    - [x] Design and create `app/modals/add-material.tsx`
+    - [x] Design and create `app/modals/add-recipe.tsx`
+    - [x] Update tab buttons to navigate to these modals
+- [x] Implement Full CRUD (Edit/Delete)
+    - [x] Add update/delete actions in `useMockDataStore`
+    - [x] Update hooks with update/delete mutations
+    - [x] Add edit/delete UI to Food, Materials, and Recipes lists
+- [/] Recipe Composition & Management
+    - [x] Create `app/recipe/[id].tsx` for detailed recipe management
+    - [x] Implement ingredient and equipment management inside recipes
+    - [ ] Add unit selection improvements for ingredients
+- [x] Advanced Unit Conversions
+    - [x] Design and implement conversion logic (e.g., Avocado -> Slices)
+    - [x] Integrate conversions into `calculateEventRequirements`
+    - [x] Add UI-ready data structures in mock store
+- [x] Final Verification
+    - [x] Test all core flows
+    - [x] Update walkthrough

@@ -1,26 +1,25 @@
-import { addDays, isBefore, parseISO } from 'date-fns';
 import { useRouter } from 'expo-router';
-import { Edit2, PackagePlus, Plus, Search, Trash2 } from 'lucide-react-native';
+import { Edit2, Info, Package, Plus, Search, Trash2 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useIngredients } from '../../src/hooks/useIngredients';
+import { useEquipment } from '../../src/hooks/useEquipment';
 import { Colors, Spacing, Typography } from '../../src/theme/constants';
 
-const CATEGORIES = ['Tutti', 'Carne', 'Pesce', 'Verdura', 'Pasta', 'Riso', 'Latticini', 'Spezie', 'Altro'];
+const CATEGORIES = ['Tutti', 'Piatti', 'Posate', 'Bicchieri', 'Coltelli', 'Altro'];
 
-export default function FoodScreen() {
+export default function MaterialsScreen() {
   const router = useRouter();
-  const { ingredients, isLoading, deleteIngredient } = useIngredients();
+  const { equipment, isLoading, deleteEquipment } = useEquipment();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tutti');
 
   const handleAdd = () => {
-    router.push('/modals/add-ingredient');
+    router.push('/modals/add-material');
   };
 
   const handleEdit = (id: string) => {
     router.push({
-      pathname: '/modals/add-ingredient',
+      pathname: '/modals/add-material',
       params: { id }
     });
   };
@@ -31,99 +30,56 @@ export default function FoodScreen() {
       `Sei sicuro di voler eliminare "${name}"?`,
       [
         { text: 'Annulla', style: 'cancel' },
-        {
-          text: 'Elimina',
+        { 
+          text: 'Elimina', 
           style: 'destructive',
-          onPress: () => deleteIngredient.mutate(id)
+          onPress: () => deleteEquipment.mutate(id)
         }
       ]
     );
   };
 
-  const filteredIngredients = useMemo(() => {
-    return ingredients.filter(item => {
-      const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
-        item.aliases.some(a => a.alias.toLowerCase().includes(search.toLowerCase()));
+  const filteredEquipment = useMemo(() => {
+    return equipment.filter(item => {
+      const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
       const matchesCategory = selectedCategory === 'Tutti' || item.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [ingredients, search, selectedCategory]);
+  }, [equipment, search, selectedCategory]);
 
-  const getStockStatus = (lots: any[]) => {
-    const now = new Date();
-    const threeDaysFromNow = addDays(now, 3);
-
-    let hasExpired = false;
-    let hasNearExpiry = false;
-
-    lots?.forEach(lot => {
-      const expiry = parseISO(lot.expiry_date);
-      if (isBefore(expiry, now)) hasExpired = true;
-      else if (isBefore(expiry, threeDaysFromNow)) hasNearExpiry = true;
-    });
-
-    if (hasExpired) return { color: Colors.error, label: 'Scaduto' };
-    if (hasNearExpiry) return { color: Colors.warning, label: 'In scadenza' };
-    return null;
-  };
-
-  const handleAddLot = (item: any) => {
-    router.push({
-      pathname: '/modals/add-lot' as any,
-      params: { 
-        ingredientId: item.id,
-        name: item.name,
-        unit: item.base_unit
-      }
-    });
-  };
-
-  const renderItem = ({ item }: { item: any }) => {
-    const status = getStockStatus(item.lots);
-
-    return (
-      <View style={styles.card}>
-        <View style={styles.cardContent}>
-          <View style={styles.iconContainer}>
-            <PackagePlus size={24} color={Colors.primary} />
-          </View>
-          <View style={styles.itemInfo}>
-            <Text style={styles.itemName}>{item.name}</Text>
-            <View style={styles.badgeRow}>
-              <View style={styles.categoryBadge}>
-                <Text style={styles.badgeText}>{item.category}</Text>
-              </View>
-              {status && (
-                <View style={[styles.statusBadge, { backgroundColor: status.color }]}>
-                  <Text style={styles.statusLabel}>{status.label}</Text>
-                </View>
-              )}
-            </View>
-            {item.aliases.length > 0 && (
-              <Text style={styles.aliases}>
-                {item.aliases.map((a: any) => a.alias).join(', ')}
-              </Text>
-            )}
-          </View>
-          <View style={styles.quantityContainer}>
-            <Text style={styles.quantity}>{item.total_quantity}</Text>
-            <Text style={styles.unitText}>{item.base_unit}</Text>
-          </View>
-          <View style={styles.actions}>
-            <TouchableOpacity onPress={() => handleAddLot(item)} style={styles.actionButton}>
-              <Plus size={18} color={Colors.primary} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleEdit(item.id)} style={styles.actionButton}>
-              <Edit2 size={18} color={Colors.primary} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleDelete(item.id, item.name)} style={styles.actionButton}>
-              <Trash2 size={18} color={Colors.error} />
-            </TouchableOpacity>
-          </View>
+  const renderItem = ({ item }: { item: any }) => (
+    <View style={styles.card}>
+      <View style={styles.cardContent}>
+        <View style={styles.iconContainer}>
+          <Package size={24} color={Colors.primary} />
+        </View>
+        <View style={styles.itemInfo}>
+          <Text style={styles.itemName}>{item.name}</Text>
+          <Text style={styles.itemCategory}>{item.category}</Text>
+        </View>
+        <View style={styles.quantityContainer}>
+          <Text style={styles.quantity}>{item.quantity_available}</Text>
+          <Text style={styles.unitText}>pz</Text>
+        </View>
+        <View style={styles.actions}>
+          <TouchableOpacity onPress={() => handleEdit(item.id)} style={styles.actionButton}>
+            <Edit2 size={18} color={Colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleDelete(item.id, item.name)} style={styles.actionButton}>
+            <Trash2 size={18} color={Colors.error} />
+          </TouchableOpacity>
         </View>
       </View>
-    );
-  };
+      {item.kit_rule && (
+        <View style={styles.kitInfo}>
+          <Info size={14} color={Colors.primary} />
+          <Text style={styles.kitText}>
+            Kit: {item.kit_rule.qty_per_person} per persona ({item.kit_rule.applies_to})
+          </Text>
+        </View>
+      )}
+    </View>
+  );
 
   if (isLoading) {
     return (
@@ -141,7 +97,7 @@ export default function FoodScreen() {
             <Search size={20} color={Colors.textSecondary} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Cerca ingredienti o alias..."
+              placeholder="Cerca materiali..."
               placeholderTextColor={Colors.placeholder}
               value={search}
               onChangeText={setSearch}
@@ -151,7 +107,7 @@ export default function FoodScreen() {
             <Plus size={24} color="#FFF" />
           </TouchableOpacity>
         </View>
-
+        
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false} 
@@ -176,13 +132,13 @@ export default function FoodScreen() {
       </View>
 
       <FlatList
-        data={filteredIngredients}
+        data={filteredEquipment}
         renderItem={renderItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Nessun ingrediente trovato</Text>
+            <Text style={styles.emptyText}>Nessun materiale trovato</Text>
           </View>
         }
       />
@@ -269,8 +225,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
-    borderWidth: 1,
-    borderColor: Colors.border,
   },
   cardContent: {
     flexDirection: 'row',
@@ -292,10 +246,9 @@ const styles = StyleSheet.create({
     ...Typography.body,
     fontWeight: 'bold',
   },
-  aliases: {
+  itemCategory: {
     ...Typography.caption,
     color: Colors.textSecondary,
-    marginTop: 2,
   },
   badgeRow: {
     flexDirection: 'row',
@@ -310,6 +263,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
+  typeBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
   badgeText: {
     fontSize: 10,
     fontWeight: 'bold',
@@ -317,7 +275,7 @@ const styles = StyleSheet.create({
   },
   quantityContainer: {
     alignItems: 'center',
-    minWidth: 50,
+    minWidth: 40,
   },
   quantity: {
     ...Typography.body,
@@ -328,15 +286,19 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: Colors.textSecondary,
   },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
+  kitInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: Spacing.sm,
+    paddingTop: Spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: Colors.background,
   },
-  statusLabel: {
-    color: '#FFF',
-    fontSize: 10,
-    fontWeight: 'bold',
+  kitText: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    fontStyle: 'italic',
   },
   emptyContainer: {
     alignItems: 'center',
