@@ -38,18 +38,20 @@ export default function EventDetailScreen() {
 
   const requirements = useMemo(() => {
     if (!event) return null;
+    const eventKits = event.kits?.map((k: any) => k.kit) || [];
     return calculateEventRequirements(
       event.menu_items.map(mi => ({ recipe: mi.recipe, portions: mi.portions })),
       event.people_count,
       event.type,
-      allEquipment as any
+      eventKits
     );
-  }, [event, allEquipment]);
+  }, [event]);
 
   const eventCost = useMemo(() => {
-    if (!event || !allEquipment) return null;
-    return calculateEventCost(event, allEquipment as any);
-  }, [event, allEquipment]);
+    if (!event) return null;
+    const eventKits = event.kits?.map((k: any) => k.kit) || [];
+    return calculateEventCost(event, eventKits);
+  }, [event]);
 
   if (isLoading || !event) {
     return (
@@ -107,7 +109,8 @@ export default function EventDetailScreen() {
 
   const handleExport = async () => {
     try {
-      await exportEventChecklist(event, allEquipment as any);
+      const eventKits = event.kits?.map((k: any) => k.kit) || [];
+      await exportEventChecklist(event, eventKits);
     } catch (error) {
       Alert.alert('Errore', 'Impossibile generare il PDF');
     }

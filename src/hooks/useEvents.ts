@@ -25,7 +25,13 @@ export const useEvents = () => {
               equipment:recipe_equipment(*, equipment_item:equipment_items(*))
             )
           ),
-          missing_items:event_missing_items(*)
+          missing_items:event_missing_items(*),
+          kits:event_kits(
+            kit:kits(
+              *,
+              rules:per_person_kit_rules(*, equipment_item:equipment_items(*))
+            )
+          )
         `)
                 .order('datetime', { ascending: true });
 
