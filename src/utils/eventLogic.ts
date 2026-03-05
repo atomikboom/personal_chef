@@ -11,8 +11,9 @@ export const calculateEventRequirements = (
     const ingredientReqs: Record<string, { id: string; name: string; qty: number; unit: string; breakdown: { recipeName: string; qty: number }[] }> = {};
     const equipmentReqs: Record<string, { id: string; name: string; qty: number; isConsumable: boolean; breakdown: { reason: string; qty: number }[] }> = {};
 
-    menuItems.forEach(({ recipe, portions }) => {
-        recipe.ingredients.forEach(ri => {
+    (menuItems || []).forEach(({ recipe, portions }) => {
+        if (!recipe) return;
+        (recipe.ingredients || []).forEach(ri => {
             const id = ri.ingredient_id;
             const ingredient = ri.ingredient as any;
             let itemQty = Number(ri.qty_per_portion) * portions;
@@ -32,7 +33,7 @@ export const calculateEventRequirements = (
             ingredientReqs[id].breakdown.push({ recipeName: recipe.name, qty: itemQty });
         });
 
-        recipe.equipment.forEach(re => {
+        (recipe.equipment || []).forEach(re => {
             const id = re.equipment_item_id;
             const itemQty = re.qty_required;
             if (!equipmentReqs[id]) {
@@ -43,7 +44,7 @@ export const calculateEventRequirements = (
         });
     });
 
-    kits.forEach(kit => {
+    (kits || []).forEach(kit => {
         if (!kit || !kit.rules) return; // Robust check
         kit.rules.forEach((rule: any) => {
             const id = rule.equipment_item_id;
@@ -156,9 +157,10 @@ export const deductStockFEFO = async (eventId: string, ingredients: any[], equip
 
 export const calculateRecipeCost = (recipe: RecipeWithDetails) => {
     let totalCost = 0;
+    if (!recipe) return totalCost;
 
     // Ingredient costs
-    recipe.ingredients.forEach(ri => {
+    (recipe.ingredients || []).forEach(ri => {
         const ingredient = ri.ingredient as any;
         // Search for the most recent lot price or fallback to default_price
         const latestLot = ingredient.lots?.length > 0
@@ -181,8 +183,8 @@ export const calculateRecipeCost = (recipe: RecipeWithDetails) => {
 
     // Equipment costs (only if we want to include consumable items in recipe cost, 
     // but usually they are at event level. However, some might be recipe-specific)
-    recipe.equipment.forEach(re => {
-        if (re.equipment_item.is_consumable) {
+    (recipe.equipment || []).forEach(re => {
+        if (re.equipment_item?.is_consumable) {
             totalCost += (re.qty_required * (re.equipment_item.unit_price || 0)) / 1; // unit_price is per item
         }
     });
@@ -198,15 +200,18 @@ export const calculateEventCost = (
     let equipmentCost = 0;
 
     // 1. Calculate cost from menu items
-    event.menu_items.forEach((mi: any) => {
-        const recipeCostPerPortion = calculateRecipeCost(mi.recipe);
-        foodCost += recipeCostPerPortion * mi.portions;
+    (event.menu_items || []).forEach((mi: any) => {
+        if (mi.recipe) {
+            const recipeCostPerPortion = calculateRecipeCost(mi.recipe);
+            foodCost += recipeCostPerPortion * mi.portions;
+        }
     });
 
     // 2. Calculate cost from selected kits
-    kits.forEach(kit => {
+    (kits || []).forEach(kit => {
+        if (!kit || !kit.rules) return;
         kit.rules.forEach((rule: any) => {
-            if (rule.equipment_item.is_consumable) {
+            if (rule.equipment_item?.is_consumable) {
                 const qty = rule.qty_per_person * event.people_count;
                 equipmentCost += qty * (rule.equipment_item.unit_price || 0);
             }
