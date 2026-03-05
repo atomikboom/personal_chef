@@ -34,6 +34,19 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f2ecabd7-0621-4329-bd37-e031b53e3254"
+      }
+    },
+    "owner": "daniele24",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f2ecabd7-0621-4329-bd37-e031b53e3254"
     }
   }
 }

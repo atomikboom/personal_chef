@@ -1,0 +1,4 @@
+Project name: personal_chef
+Database password: mef_personalchef
+
+postgresql://postgres:mef_personalchef@db.zaggtcnpukeofnvimgzg.supabase.co:5432/postgres
