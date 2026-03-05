@@ -4,8 +4,8 @@ import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useEquipment } from '../../src/hooks/useEquipment';
 import { useEvents } from '../../src/hooks/useEvents';
+import { useKits } from '../../src/hooks/useKits';
 import { useRecipes } from '../../src/hooks/useRecipes';
-import { useMockDataStore } from '../../src/store/useMockDataStore';
 import { Colors, Spacing, Typography } from '../../src/theme/constants';
 import { calculateEventRequirements, deductStockFEFO } from '../../src/utils/eventLogic';
 
@@ -14,6 +14,7 @@ export default function NewEventScreen() {
   const { recipes } = useRecipes();
   const { equipment } = useEquipment();
   const { addEvent } = useEvents();
+  const { kits } = useKits();
 
   const [title, setTitle] = useState('');
   const [type, setType] = useState<'domicilio' | 'asporto'>('domicilio');
@@ -122,7 +123,7 @@ export default function NewEventScreen() {
         return { recipe, portions: sr.portions };
       });
 
-      const selectedKits = (useMockDataStore.getState().kits || []).filter(k => selectedKitIds.includes(k.id));
+      const selectedKits = (kits || []).filter(k => selectedKitIds.includes(k.id));
 
       const { ingredientReqs, equipmentReqs } = calculateEventRequirements(
         menuItemsWithFullDetails,
@@ -269,7 +270,7 @@ export default function NewEventScreen() {
         <View style={styles.section}>
           <Text style={styles.label}>Kit da aggiungere (Personale/Servizio)</Text>
           <View style={styles.kitList}>
-            {(useMockDataStore.getState().kits || []).map(kit => {
+            {(kits || []).map(kit => {
               const isSelected = selectedKitIds.includes(kit.id);
               return (
                 <TouchableOpacity 
