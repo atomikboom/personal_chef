@@ -41,7 +41,7 @@ export default function EventDetailScreen() {
     // Normalize kits: in Mock Mode event.kits is KitWithRules[], in Supabase it's { kit: KitWithRules }[]
     const eventKits = event.kits?.map((k: any) => k.kit ? k.kit : k) || [];
     return calculateEventRequirements(
-      event.menu_items.map(mi => ({ recipe: mi.recipe, portions: mi.portions })),
+      (event.menu_items || []).map(mi => ({ recipe: mi.recipe, portions: mi.portions })),
       event.people_count,
       event.type,
       eventKits
@@ -117,7 +117,7 @@ export default function EventDetailScreen() {
     }
   };
 
-  const missingItems = event.missing_items.filter(m => !m.resolved);
+  const missingItems = (event.missing_items || []).filter(m => !m.resolved);
 
   return (
     <View style={styles.container}>
@@ -155,7 +155,9 @@ export default function EventDetailScreen() {
             {missingItems.map((m, i) => (
               <View key={i} style={styles.missingItem}>
                 <Text style={styles.missingLabel}>
-                  {m.item_type === 'ingredient' ? 'Ingrediente' : 'Materiale'} (ID: {m.ref_id.substring(0, 8)}...)
+                  {m.item_type === 'ingredient' 
+                    ? allIngredients.find(ing => ing.id === m.ref_id)?.name || `Ingrediente (ID: ${m.ref_id.substring(0, 8)}...)`
+                    : allEquipment.find(eq => eq.id === m.ref_id)?.name || `Materiale (ID: ${m.ref_id.substring(0, 8)}...)`}
                 </Text>
                 <Text style={styles.missingQty}>{m.qty_missing} {m.unit || 'pz'}</Text>
               </View>
@@ -187,7 +189,7 @@ export default function EventDetailScreen() {
             <Soup size={20} color={Colors.primary} />
             <Text style={styles.sectionTitle}>Menù</Text>
           </View>
-          {event.menu_items.map((mi, i) => (
+          {(event.menu_items || []).map((mi, i) => (
             <View key={i} style={styles.card}>
               <Text style={styles.recipeName}>{mi.recipe.name}</Text>
               <Text style={styles.portions}>{mi.portions} porzioni</Text>
