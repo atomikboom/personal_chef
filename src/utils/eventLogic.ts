@@ -44,7 +44,7 @@ export const calculateEventRequirements = (
     });
 
     kits.forEach(kit => {
-        if (!kit.rules) return; // Defensive check
+        if (!kit || !kit.rules) return; // Robust check
         kit.rules.forEach((rule: any) => {
             const id = rule.equipment_item_id;
             const itemQty = rule.qty_per_person * peopleCount;

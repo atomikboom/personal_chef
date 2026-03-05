@@ -38,7 +38,8 @@ export default function EventDetailScreen() {
 
   const requirements = useMemo(() => {
     if (!event) return null;
-    const eventKits = event.kits?.map((k: any) => k.kit) || [];
+    // Normalize kits: in Mock Mode event.kits is KitWithRules[], in Supabase it's { kit: KitWithRules }[]
+    const eventKits = event.kits?.map((k: any) => k.kit ? k.kit : k) || [];
     return calculateEventRequirements(
       event.menu_items.map(mi => ({ recipe: mi.recipe, portions: mi.portions })),
       event.people_count,
@@ -49,7 +50,7 @@ export default function EventDetailScreen() {
 
   const eventCost = useMemo(() => {
     if (!event) return null;
-    const eventKits = event.kits?.map((k: any) => k.kit) || [];
+    const eventKits = event.kits?.map((k: any) => k.kit ? k.kit : k) || [];
     return calculateEventCost(event, eventKits);
   }, [event]);
 
@@ -109,7 +110,7 @@ export default function EventDetailScreen() {
 
   const handleExport = async () => {
     try {
-      const eventKits = event.kits?.map((k: any) => k.kit) || [];
+      const eventKits = event.kits?.map((k: any) => k.kit ? k.kit : k) || [];
       await exportEventChecklist(event, eventKits);
     } catch (error) {
       Alert.alert('Errore', 'Impossibile generare il PDF');
