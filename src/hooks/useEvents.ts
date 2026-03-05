@@ -99,6 +99,30 @@ export const useEvents = () => {
         },
     });
 
+    const deleteEvent = useMutation({
+        mutationFn: async (eventId: string) => {
+            if (isMockMode) {
+                mockStore.events = mockStore.events.filter(ev => ev.id !== eventId);
+                return;
+            }
+
+            // Delete related rows first (cascade may not be set on all tables)
+            await supabase.from('event_menu_items').delete().eq('event_id', eventId);
+            await supabase.from('event_missing_items').delete().eq('event_id', eventId);
+            await supabase.from('event_kits').delete().eq('event_id', eventId);
+
+            const { error } = await supabase
+                .from('events')
+                .delete()
+                .eq('id', eventId);
+
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['events'] });
+        },
+    });
+
     const updateEvent = useMutation({
         mutationFn: async (event: Partial<Event> & { id: string }) => {
             if (isMockMode) {
@@ -128,5 +152,6 @@ export const useEvents = () => {
         addEvent,
         updateEvent,
         closeEvent,
+        deleteEvent,
     };
 };

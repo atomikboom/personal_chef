@@ -1,5 +1,5 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { AlertTriangle, CheckCircle2, ChevronDown, ChevronLeft, ChevronUp, Circle, FileText, Package, Save, Share2, Soup } from 'lucide-react-native';
+import { AlertTriangle, CheckCircle2, ChevronDown, ChevronLeft, ChevronUp, Circle, FileText, Package, Save, Share2, Soup, Trash2 } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useEquipment } from '../../src/hooks/useEquipment';
@@ -12,7 +12,7 @@ import { exportEventChecklist } from '../../src/utils/pdfExport';
 export default function EventDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const { events, isLoading: eventsLoading, updateEvent, closeEvent } = useEvents();
+  const { events, isLoading: eventsLoading, updateEvent, closeEvent, deleteEvent } = useEvents();
   const { ingredients: allIngredients, isLoading: ingLoading } = useIngredients();
   const { equipment: allEquipment, isLoading: eqLoading } = useEquipment();
   const event = events.find(e => e.id === id);
@@ -117,6 +117,28 @@ export default function EventDetailScreen() {
     }
   };
 
+  const handleDeleteEvent = () => {
+    Alert.alert(
+      'Elimina Evento',
+      `Sei sicuro di voler eliminare "${event.title}"? L'operazione non può essere annullata.`,
+      [
+        { text: 'Annulla', style: 'cancel' },
+        {
+          text: 'Elimina',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteEvent.mutateAsync(event.id);
+              router.back();
+            } catch (error) {
+              Alert.alert('Errore', 'Impossibile eliminare l\'evento');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const missingItems = (event.missing_items || []).filter(m => !m.resolved);
 
   return (
@@ -130,9 +152,14 @@ export default function EventDetailScreen() {
           </TouchableOpacity>
         ),
         headerRight: () => (
-          <TouchableOpacity onPress={handleExport} style={{ padding: 10 }}>
-            <Share2 size={24} color={Colors.primary} />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity onPress={handleDeleteEvent} style={{ padding: 10 }}>
+              <Trash2 size={22} color="#e74c3c" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleExport} style={{ padding: 10 }}>
+              <Share2 size={24} color={Colors.primary} />
+            </TouchableOpacity>
+          </View>
         )
       }} />
 
